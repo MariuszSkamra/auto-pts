@@ -36,6 +36,7 @@ import xmlrpc.client
 import xmlrpc.server
 import winutils
 import ptscontrol
+from http.server import BaseHTTPRequestHandler
 from config import SERVER_PORT
 
 log = logging.debug
@@ -92,6 +93,11 @@ class PyPTSWithXmlRpcCallback(ptscontrol.PyPTS):
         self.client_xmlrpc_proxy = None
 
 
+def address_string(self):
+    host, port = self.client_address[:2]
+    return '%s (no getfqdn)' % host  # used to call: socket.getfqdn(host)
+
+
 def main():
     """Main."""
     winutils.exit_if_admin()
@@ -116,6 +122,8 @@ def main():
     print("OK")
 
     print("Serving on port {} ...".format(SERVER_PORT))
+
+    BaseHTTPRequestHandler.address_string = address_string
 
     server = xmlrpc.server.SimpleXMLRPCServer(("", SERVER_PORT), allow_none=True)
     server.register_instance(pts)
